@@ -1,0 +1,17 @@
+{
+  "tests": [
+    {
+      "name": "Upload file with base64 content",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "user_id": 1,
+        "filename": "test.txt",
+        "file_content": "SGVsbG8gV29ybGQh",
+        "mime_type": "text/plain"
+      },
+      "expectedStatus": 200,
+      "bodyMatcher": "partial"
+    }
+  ]
+}

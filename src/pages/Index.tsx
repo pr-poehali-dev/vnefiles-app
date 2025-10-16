@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 
 const AUTH_URL = 'https://functions.poehali.dev/d2285ca8-25fa-45d0-87a2-081191bb2b9f';
 const FILES_URL = 'https://functions.poehali.dev/adfcdc9c-946e-4291-8bd3-ca871f6f9c22';
+const UPLOAD_URL = 'https://functions.poehali.dev/ca939b19-d15e-4732-aa97-a605ee11cc7e';
 
 interface User {
   user_id: number;
@@ -123,31 +124,42 @@ export default function Index() {
   const handleFileUpload = async () => {
     if (!uploadFile || !user) return;
 
-    const mockFileUrl = `https://storage.example.com/${Date.now()}_${uploadFile.name}`;
+    toast({ title: '⏳ Загрузка...', description: 'Файл отправляется в облако' });
 
     try {
-      const response = await fetch(FILES_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'upload',
-          user_id: user.user_id,
-          filename: uploadFile.name,
-          file_url: mockFileUrl,
-          file_size: uploadFile.size,
-          mime_type: uploadFile.type
-        })
-      });
+      const reader = new FileReader();
+      
+      reader.onload = async (e) => {
+        const base64Content = e.target?.result as string;
+        const base64Data = base64Content.split(',')[1];
 
-      const data = await response.json();
+        const uploadResponse = await fetch(UPLOAD_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            user_id: user.user_id,
+            filename: uploadFile.name,
+            file_content: base64Data,
+            mime_type: uploadFile.type || 'application/octet-stream'
+          })
+        });
 
-      if (response.ok) {
-        toast({ title: '✅ Файл загружен', description: data.message });
-        setUploadFile(null);
-        loadFiles();
-      } else {
-        toast({ title: '❌ Ошибка', description: data.error, variant: 'destructive' });
-      }
+        const uploadData = await uploadResponse.json();
+
+        if (uploadResponse.ok) {
+          toast({ title: '✅ Файл загружен', description: uploadData.message });
+          setUploadFile(null);
+          loadFiles();
+        } else {
+          toast({ title: '❌ Ошибка', description: uploadData.error, variant: 'destructive' });
+        }
+      };
+
+      reader.onerror = () => {
+        toast({ title: '❌ Ошибка', description: 'Не удалось прочитать файл', variant: 'destructive' });
+      };
+
+      reader.readAsDataURL(uploadFile);
     } catch (error) {
       toast({ title: '❌ Ошибка', description: 'Не удалось загрузить файл', variant: 'destructive' });
     }
