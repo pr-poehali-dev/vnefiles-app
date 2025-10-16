@@ -71,9 +71,11 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'body': json.dumps({'error': 'Email уже зарегистрирован'})
                 }
             
+            is_verified = user_type == 'special'
+            
             cur.execute(
-                "INSERT INTO users (email, password_hash, user_type) VALUES (%s, %s, %s) RETURNING id",
-                (email, password_hash, user_type)
+                "INSERT INTO users (email, password_hash, user_type, is_verified) VALUES (%s, %s, %s, %s) RETURNING id",
+                (email, password_hash, user_type, is_verified)
             )
             
             user_id = cur.fetchone()[0]
@@ -90,7 +92,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 'body': json.dumps({
                     'user_id': user_id,
                     'email': email,
-                    'user_type': user_type
+                    'user_type': user_type,
+                    'is_verified': is_verified
                 })
             }
         
@@ -100,7 +103,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             password_hash = hashlib.sha256(password.encode()).hexdigest()
             
             cur.execute(
-                "SELECT id, email, user_type FROM users WHERE email = %s AND password_hash = %s",
+                "SELECT id, email, user_type, is_verified FROM users WHERE email = %s AND password_hash = %s",
                 (email, password_hash)
             )
             
@@ -128,7 +131,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 'body': json.dumps({
                     'user_id': user[0],
                     'email': user[1],
-                    'user_type': user[2]
+                    'user_type': user[2],
+                    'is_verified': user[3] if user[3] is not None else False
                 })
             }
         

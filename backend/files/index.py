@@ -31,7 +31,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     
     if method == 'GET':
         cur.execute(
-            "SELECT f.id, f.filename, f.file_url, f.file_size, f.mime_type, f.downloads_count, f.created_at, u.email, u.user_type FROM files f JOIN users u ON f.user_id = u.id ORDER BY f.created_at DESC"
+            "SELECT f.id, f.filename, f.file_url, f.file_size, f.mime_type, f.downloads_count, f.created_at, u.email, u.user_type, u.id, u.is_verified FROM files f JOIN users u ON f.user_id = u.id ORDER BY f.created_at DESC"
         )
         
         files = []
@@ -45,7 +45,9 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 'downloads_count': row[5],
                 'created_at': row[6].isoformat() if row[6] else None,
                 'uploader_email': row[7],
-                'uploader_type': row[8]
+                'uploader_type': row[8],
+                'uploader_id': row[9],
+                'uploader_verified': row[10]
             })
         
         conn.close()
