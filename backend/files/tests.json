@@ -1,0 +1,26 @@
+{
+  "tests": [
+    {
+      "name": "Get all files",
+      "method": "GET",
+      "path": "/",
+      "expectedStatus": 200,
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Upload file as special user",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "action": "upload",
+        "user_id": 1,
+        "filename": "test.pdf",
+        "file_url": "https://example.com/test.pdf",
+        "file_size": 1024,
+        "mime_type": "application/pdf"
+      },
+      "expectedStatus": 200,
+      "bodyMatcher": "partial"
+    }
+  ]
+}

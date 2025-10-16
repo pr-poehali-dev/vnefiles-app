@@ -1,0 +1,52 @@
+{
+  "tests": [
+    {
+      "name": "Register special user with correct code",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "action": "register",
+        "email": "newspecial@test.com",
+        "password": "test123",
+        "user_type": "special",
+        "special_code": "669"
+      },
+      "expectedStatus": 200,
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Register special user with wrong code",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "action": "register",
+        "email": "wrong@test.com",
+        "password": "test123",
+        "user_type": "special",
+        "special_code": "123"
+      },
+      "expectedStatus": 400,
+      "expectedBody": {
+        "error": "string"
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Login user",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "action": "login",
+        "email": "special@test.com",
+        "password": "test123"
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "user_id": 1,
+        "email": "special@test.com",
+        "user_type": "special"
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}
